@@ -38,7 +38,7 @@
         <!-- Các chức năng yêu cầu -->
         <div class="border-t pt-3 mt-3" style="border-color: #e1e3e1;">
             @auth
-                <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin">
+                <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin/analytics">
                     <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Admin
                 </a>
                 <form action="{{ route('logout') }}" method="POST" class="m-0">
