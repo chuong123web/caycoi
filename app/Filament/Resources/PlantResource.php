@@ -101,7 +101,7 @@ class PlantResource extends Resource
 
                 \Filament\Schemas\Components\Section::make('Hình ảnh')
                     ->schema([
-                        \Filament\Schemas\Components\Placeholder::make('current_image')
+                        \Filament\Forms\Components\Placeholder::make('current_image')
                             ->label('Ảnh đang hiển thị trên Web')
                             ->content(fn ($record) => $record && $record->image_url ? new \Illuminate\Support\HtmlString('<img src="' . $record->image_url . '" style="max-height: 200px; border-radius: 8px;">') : 'Chưa có ảnh')
                             ->columnSpanFull(),
