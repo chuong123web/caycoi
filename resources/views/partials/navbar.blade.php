@@ -20,7 +20,7 @@
                 <span class="material-symbols-outlined">shopping_cart</span>
                 <span id="cart-badge" class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center" style="background-color: #c4451c; color: #fff; display: none;">0</span>
             </a>
-            <a href="{{ route('login') }}" class="nav-icon-btn" data-tippy-content="Tài khoản">
+            <a href="{{ route('login') }}" class="nav-icon-btn" data-tippy-content="{{ auth()->check() ? auth()->user()->name : 'Tài khoản' }}">
                 <span class="material-symbols-outlined">person</span>
             </a>
             <!-- Mobile menu button -->
