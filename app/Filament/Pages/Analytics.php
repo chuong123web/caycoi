@@ -16,7 +16,7 @@ class Analytics extends Page
     protected static string|\UnitEnum|null $navigationGroup = 'Thống Kê';
     protected static ?int $navigationSort = 1;
 
-    protected static string $view = 'filament.pages.analytics';
+    protected string $view = 'filament.pages.analytics';
 
     public function getViewData(): array
     {
