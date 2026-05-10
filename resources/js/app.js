@@ -183,9 +183,55 @@ const VerdantCart = {
         const fullName = (firstName + ' ' + lastName).trim() || 'Khách hàng';
         const finalAddress = (addressInput + (city ? ', ' + city : '')) || 'Chưa cung cấp';
         
-        // Validate required fields
-        if (!email || !firstName || !addressInput) {
-            if (typeof notyf !== 'undefined') notyf.error('Vui lòng điền đầy đủ thông tin giao hàng!');
+        // Validate required fields - highlight missing ones in red
+        const requiredFields = [
+            { id: 'email', label: 'Email' },
+            { id: 'firstName', label: 'Họ' },
+            { id: 'lastName', label: 'Tên' },
+            { id: 'address', label: 'Địa chỉ' },
+            { id: 'city', label: 'Thành phố' },
+            { id: 'phone', label: 'Số điện thoại' },
+        ];
+        let missingFields = [];
+        
+        // Clear all previous error states
+        requiredFields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (el) {
+                el.classList.remove('!border-red-500', '!bg-red-50', '!ring-red-200');
+                // Remove old error label
+                const oldErr = el.parentElement.querySelector('.field-error-msg');
+                if (oldErr) oldErr.remove();
+            }
+        });
+        
+        // Check and highlight empty required fields
+        requiredFields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (el && !el.value.trim()) {
+                missingFields.push(f.label);
+                el.classList.add('!border-red-500', '!bg-red-50', '!ring-red-200');
+                // Add error message below the input
+                const errSpan = document.createElement('span');
+                errSpan.className = 'field-error-msg text-red-500 text-xs font-semibold mt-1 block';
+                errSpan.textContent = `⚠ ${f.label} không được để trống`;
+                el.parentElement.appendChild(errSpan);
+                // Auto-remove red when user starts typing
+                el.addEventListener('input', function handler() {
+                    el.classList.remove('!border-red-500', '!bg-red-50', '!ring-red-200');
+                    const msg = el.parentElement.querySelector('.field-error-msg');
+                    if (msg) msg.remove();
+                    el.removeEventListener('input', handler);
+                });
+            }
+        });
+        
+        if (missingFields.length > 0) {
+            if (typeof notyf !== 'undefined') notyf.error(`Vui lòng điền: ${missingFields.join(', ')}`);
+            // Scroll to first empty field
+            const firstEmpty = document.getElementById(requiredFields.find(f => !document.getElementById(f.id)?.value.trim())?.id);
+            if (firstEmpty) firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstEmpty?.focus();
             return;
         }
 
