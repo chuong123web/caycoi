@@ -37,7 +37,7 @@
         
         <!-- Các chức năng yêu cầu -->
         <div class="border-t pt-3 mt-3" style="border-color: #e1e3e1;">
-            <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin/login">
+            <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin/users">
                 <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Admin
             </a>
             @auth
