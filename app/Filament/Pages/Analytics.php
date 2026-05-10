@@ -11,10 +11,12 @@ use Illuminate\Support\Facades\DB;
 class Analytics extends Page
 {
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'Phân Tích Dữ Liệu';
+    protected static ?string $navigationLabel = 'Dashboard (Phân Tích)';
     protected static ?string $title = 'Phân Tích Khách Hàng & Sản Phẩm';
     protected static string|\UnitEnum|null $navigationGroup = 'Thống Kê';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = -1; // Đưa lên đầu
+    protected static ?string $slug = ''; // Đặt làm trang chủ Admin
+
 
     protected string $view = 'filament.pages.analytics';
 
