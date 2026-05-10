@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class Analytics extends Page
 {
-    protected static string|null $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationLabel = 'Phân Tích Dữ Liệu';
     protected static ?string $title = 'Phân Tích Khách Hàng & Sản Phẩm';
     protected static string|\UnitEnum|null $navigationGroup = 'Thống Kê';
