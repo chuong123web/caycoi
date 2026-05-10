@@ -37,10 +37,12 @@
         
         <!-- Các chức năng yêu cầu -->
         <div class="border-t pt-3 mt-3" style="border-color: #e1e3e1;">
-            <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin">
-                <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Admin
-            </a>
             @auth
+                @if(auth()->user()->hasRole(['super_admin', 'admin']))
+                    <a class="block py-2 text-stone-600 hover:text-emerald-800 font-medium transition-colors flex items-center gap-2" href="/admin">
+                        <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> Admin
+                    </a>
+                @endif
                 <form action="{{ route('logout') }}" method="POST" class="m-0">
                     @csrf
                     <button type="submit" class="block w-full text-left py-2 text-red-600 hover:text-red-800 font-medium transition-colors flex items-center gap-2">
