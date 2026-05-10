@@ -64,6 +64,7 @@
             @yield('content')
         </main>
         @include('partials.footer')
+        @include('partials.promo-popup')
     @endif
 
     <!-- [8] GSAP -->

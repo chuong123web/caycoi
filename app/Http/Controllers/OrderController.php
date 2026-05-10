@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\GiftCode;
+use App\Models\OrderItem;
 
 class OrderController extends Controller
 {
@@ -18,6 +19,11 @@ class OrderController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'gift_code_id' => 'nullable|exists:gift_codes,id',
             'discount_amount' => 'nullable|numeric|min:0',
+            'items' => 'required|array|min:1',
+            'items.*.plant_slug' => 'required|string',
+            'items.*.plant_name' => 'required|string',
+            'items.*.price' => 'required|numeric|min:0',
+            'items.*.quantity' => 'required|integer|min:1',
         ]);
 
         $order = Order::create([
@@ -34,8 +40,16 @@ class OrderController extends Controller
             'notes' => 'Tạo từ frontend',
         ]);
 
-        // Note: For a real app, you would also save the order items here in an `order_items` table.
-        // For now, we are just storing the main order record as per current schema.
+        // Save order items
+        foreach ($request->items as $item) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'plant_slug' => $item['plant_slug'],
+                'plant_name' => $item['plant_name'],
+                'price' => $item['price'],
+                'quantity' => $item['quantity'],
+            ]);
+        }
 
         if ($request->gift_code_id) {
             $giftCode = GiftCode::find($request->gift_code_id);

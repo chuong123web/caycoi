@@ -10,7 +10,7 @@ class OrderForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Section::make('Thông tin đơn hàng')
+                \Filament\Schemas\Components\Section::make('Thông tin đơn hàng')
                     ->schema([
                         \Filament\Forms\Components\TextInput::make('order_number')
                             ->label('Mã đơn hàng')
@@ -50,7 +50,7 @@ class OrderForm
                             ->default(0),
                     ])->columns(2),
 
-                \Filament\Forms\Components\Section::make('Thông tin người nhận')
+                \Filament\Schemas\Components\Section::make('Thông tin người nhận')
                     ->schema([
                         \Filament\Forms\Components\TextInput::make('customer_name')
                             ->label('Tên người nhận')

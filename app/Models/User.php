@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'gender', 'birthdate'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
@@ -31,6 +31,33 @@ class User extends Authenticatable implements FilamentUser
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birthdate' => 'date',
         ];
+    }
+
+    /**
+     * Get user's age.
+     */
+    public function getAgeAttribute(): ?int
+    {
+        return $this->birthdate ? $this->birthdate->age : null;
+    }
+
+    /**
+     * Get user's age group for analysis.
+     */
+    public function getAgeGroupAttribute(): ?string
+    {
+        if (!$this->age) return null;
+        if ($this->age < 25) return '18-24';
+        if ($this->age < 35) return '25-34';
+        if ($this->age < 45) return '35-44';
+        if ($this->age < 55) return '45-54';
+        return '55+';
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class);
     }
 }

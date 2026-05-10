@@ -13,7 +13,7 @@ class GiftCodeForm
     {
         return $schema
             ->components([
-                \Filament\Forms\Components\Section::make('Thông tin mã giảm giá')
+                \Filament\Schemas\Components\Section::make('Thông tin mã giảm giá')
                     ->schema([
                         TextInput::make('code')
                             ->label('Mã CODE')

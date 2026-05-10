@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('gift_code_id')->nullable()->constrained('gift_codes')->nullOnDelete()->after('total_amount');
-            $table->integer('discount_amount')->default(0)->after('gift_code_id');
+            if (!Schema::hasColumn('orders', 'gift_code_id')) {
+                $table->foreignId('gift_code_id')->nullable()->constrained('gift_codes')->nullOnDelete()->after('total_amount');
+            }
+            if (!Schema::hasColumn('orders', 'discount_amount')) {
+                $table->integer('discount_amount')->default(0)->after('gift_code_id');
+            }
         });
     }
 

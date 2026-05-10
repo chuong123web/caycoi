@@ -42,6 +42,21 @@
                     <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:#434843;" for="reg_email">Email</label>
                     <input style="width:100%;border:1.5px solid #c3c8c1;border-radius:0.75rem;padding:0.75rem 1rem;font-size:16px;color:#191c1b;background:#fff;outline:none;transition:border-color 0.2s;" id="reg_email" name="email" placeholder="email@example.com" required type="email" onfocus="this.style.borderColor='#061b0e'" onblur="this.style.borderColor='#c3c8c1'"/>
                 </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:#434843;" for="gender">Giới tính</label>
+                        <select style="width:100%;border:1.5px solid #c3c8c1;border-radius:0.75rem;padding:0.75rem 1rem;font-size:16px;color:#191c1b;background:#fff;outline:none;transition:border-color 0.2s;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg fill=&quot;%23434843&quot; viewBox=&quot;0 0 20 20&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;><path d=&quot;M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z&quot;/></svg>');background-repeat:no-repeat;background-position:right 0.75rem center;background-size:1.25rem;" id="gender" name="gender" required onfocus="this.style.borderColor='#061b0e'" onblur="this.style.borderColor='#c3c8c1'">
+                            <option value="" disabled selected>Chọn</option>
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:#434843;" for="birthdate">Ngày sinh</label>
+                        <input style="width:100%;border:1.5px solid #c3c8c1;border-radius:0.75rem;padding:0.75rem 1rem;font-size:16px;color:#191c1b;background:#fff;outline:none;transition:border-color 0.2s;" id="birthdate" name="birthdate" required type="date" onfocus="this.style.borderColor='#061b0e'" onblur="this.style.borderColor='#c3c8c1'"/>
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider mb-1.5" style="color:#434843;" for="reg_password">Mật khẩu</label>
                     <input style="width:100%;border:1.5px solid #c3c8c1;border-radius:0.75rem;padding:0.75rem 1rem;font-size:16px;color:#191c1b;background:#fff;outline:none;transition:border-color 0.2s;" id="reg_password" name="password" placeholder="••••••••" required type="password" onfocus="this.style.borderColor='#061b0e'" onblur="this.style.borderColor='#c3c8c1'"/>

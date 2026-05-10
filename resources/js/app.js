@@ -228,7 +228,13 @@ const VerdantCart = {
                     shipping_address: finalAddress,
                     total_amount: total,
                     gift_code_id: discountCodeId,
-                    discount_amount: discount
+                    discount_amount: discount,
+                    items: this.items.map(i => ({
+                        plant_slug: i.id,
+                        plant_name: i.name,
+                        price: i.price,
+                        quantity: i.qty
+                    }))
                 })
             });
 
