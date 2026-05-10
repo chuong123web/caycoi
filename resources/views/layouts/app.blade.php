@@ -59,12 +59,12 @@
     @hasSection('custom-layout')
         @yield('content')
     @else
+        @include('partials.promo-popup')
         @include('partials.navbar')
         <main class="flex-grow page-transition">
             @yield('content')
         </main>
         @include('partials.footer')
-        @include('partials.promo-popup')
     @endif
 
     <!-- [8] GSAP -->
