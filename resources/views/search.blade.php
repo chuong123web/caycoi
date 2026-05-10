@@ -15,10 +15,24 @@
         </div>
         <!-- Quick Filters -->
         <div class="flex flex-wrap justify-center gap-2">
-            <button onclick="document.getElementById('search-input').value='dễ chăm sóc';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105" style="background:#c9e7d7;color:#061b0e;">Dễ chăm sóc</button>
-            <button onclick="document.getElementById('search-input').value='ít ánh sáng';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">Ít ánh sáng</button>
-            <button onclick="document.getElementById('search-input').value='lọc không khí';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">Lọc không khí</button>
-            <button onclick="document.getElementById('search-input').value='cây treo';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">Cây treo</button>
+            <button onclick="document.getElementById('search-input').value='dễ chăm sóc';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#c9e7d7;color:#061b0e;">
+                <span class="material-symbols-outlined text-[16px]">eco</span> Dễ chăm sóc
+            </button>
+            <button onclick="document.getElementById('search-input').value='ít ánh sáng';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">
+                <span class="material-symbols-outlined text-[16px]">dark_mode</span> Ít ánh sáng
+            </button>
+            <button onclick="document.getElementById('search-input').value='lọc không khí';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">
+                <span class="material-symbols-outlined text-[16px]">air</span> Lọc không khí
+            </button>
+            <button onclick="document.getElementById('search-input').value='cây treo';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">
+                <span class="material-symbols-outlined text-[16px]">potted_plant</span> Cây treo
+            </button>
+            <button onclick="document.getElementById('search-input').value='để bàn';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">
+                <span class="material-symbols-outlined text-[16px]">desk</span> Để bàn
+            </button>
+            <button onclick="document.getElementById('search-input').value='phong thủy';document.getElementById('search-input').dispatchEvent(new Event('input'))" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-105 hover:shadow-md flex items-center gap-1.5" style="background:#fff;color:#434843;border:1px solid #c3c8c1;">
+                <span class="material-symbols-outlined text-[16px]">spa</span> Phong thủy
+            </button>
         </div>
     </section>
 
