@@ -30,7 +30,7 @@ class PlantResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin cơ bản')
+                \Filament\Schemas\Components\Section::make('Thông tin cơ bản')
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label('Tên (English)')
@@ -86,7 +86,7 @@ class PlantResource extends Resource
                             ->default(true),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Mô tả & Chăm sóc')
+                \Filament\Schemas\Components\Section::make('Mô tả & Chăm sóc')
                     ->schema([
                         Forms\Components\Textarea::make('description')
                             ->label('Mô tả')
@@ -99,8 +99,13 @@ class PlantResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Hình ảnh')
+                \Filament\Schemas\Components\Section::make('Hình ảnh')
                     ->schema([
+                        \Filament\Schemas\Components\Placeholder::make('current_image')
+                            ->label('Ảnh đang hiển thị trên Web')
+                            ->content(fn ($record) => $record && $record->image_url ? new \Illuminate\Support\HtmlString('<img src="' . $record->image_url . '" style="max-height: 200px; border-radius: 8px;">') : 'Chưa có ảnh')
+                            ->columnSpanFull(),
+
                         SpatieMediaLibraryFileUpload::make('thumbnail')
                             ->label('Ảnh đại diện')
                             ->collection('thumbnail')
@@ -124,11 +129,9 @@ class PlantResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\SpatieMediaLibraryImageColumn::make('thumbnail')
+                Tables\Columns\ImageColumn::make('image_url')
                     ->label('Ảnh')
-                    ->collection('thumbnail')
-                    ->circular()
-                    ->defaultImageUrl('/images/placeholder-plant.jpg'),
+                    ->circular(),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên')
