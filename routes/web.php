@@ -5,18 +5,87 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 Route::get('/debug-error', function () {
+    $results = [];
+
+    // Step 1: Basic PHP
+    $results['php_version'] = phpversion();
+
+    // Step 2: Database connection
     try {
-        // Try rendering the home page
-        $html = view('home')->render();
-        return response()->json(['status' => 'ok', 'html_length' => strlen($html)]);
+        \Illuminate\Support\Facades\DB::select('SELECT 1');
+        $results['db'] = 'OK';
     } catch (\Throwable $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => collect($e->getTrace())->take(5)->map(fn($t) => ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?'))->toArray(),
-        ], 500);
+        $results['db'] = 'FAIL: ' . $e->getMessage();
     }
+
+    // Step 3: Plants model
+    try {
+        $count = \App\Models\Plant::count();
+        $results['plants_count'] = $count;
+    } catch (\Throwable $e) {
+        $results['plants_model'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Step 4: Plants active scope
+    try {
+        $active = \App\Models\Plant::active()->count();
+        $results['plants_active'] = $active;
+    } catch (\Throwable $e) {
+        $results['plants_active'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Step 5: Spatie Media
+    try {
+        $plant = \App\Models\Plant::active()->first();
+        if ($plant) {
+            $url = $plant->getFirstMediaUrl('thumbnail');
+            $results['media_url'] = $url ?: '(empty)';
+            $results['image_url_attr'] = $plant->image_url;
+        } else {
+            $results['plant'] = 'no active plant found';
+        }
+    } catch (\Throwable $e) {
+        $results['media'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Step 6: View composer (globalPlants)
+    try {
+        $globalPlants = \Illuminate\Support\Facades\Cache::remember('debug_global_plants', 10, function () {
+            return \App\Models\Plant::active()->get()->map(function($plant) {
+                return [
+                    'id' => $plant->slug,
+                    'name' => $plant->name,
+                    'img' => $plant->image_url,
+                ];
+            });
+        });
+        $results['global_plants'] = $globalPlants->count() . ' plants loaded';
+    } catch (\Throwable $e) {
+        $results['global_plants'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Step 7: Vite manifest
+    try {
+        $manifestPath = public_path('build/manifest.json');
+        $results['vite_manifest_exists'] = file_exists($manifestPath);
+        if (file_exists($manifestPath)) {
+            $results['vite_manifest'] = json_decode(file_get_contents($manifestPath), true);
+        }
+    } catch (\Throwable $e) {
+        $results['vite'] = 'FAIL: ' . $e->getMessage();
+    }
+
+    // Step 8: Try render view
+    try {
+        $html = view('home')->render();
+        $results['view_render'] = 'OK - ' . strlen($html) . ' bytes';
+    } catch (\Throwable $e) {
+        $results['view_render'] = 'FAIL: ' . $e->getMessage();
+        $results['view_file'] = $e->getFile() . ':' . $e->getLine();
+        $results['view_trace'] = collect($e->getTrace())->take(5)->map(fn($t) => ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?'))->toArray();
+    }
+
+    return response()->json($results, 200);
 });
 
 Route::get('/', function () {
