@@ -26,8 +26,13 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-        // Only load globalPlants for frontend views (NOT admin/filament)
-        \Illuminate\Support\Facades\View::composer('layouts.app', function ($view) {
+        // Load globalPlants for frontend views, skip admin/filament views
+        \Illuminate\Support\Facades\View::composer('*', function ($view) {
+            $viewName = $view->getName();
+            // Skip Filament/admin views for performance
+            if (str_starts_with($viewName, 'filament') || str_starts_with($viewName, 'livewire')) {
+                return;
+            }
             $globalPlants = Cache::remember('global_plants', 300, function () {
                 return \App\Models\Plant::active()->get()->map(function($plant) {
                     $img = $plant->image_url;
