@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS in production (Railway serves via HTTPS but APP_URL may be http)
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
         \Illuminate\Support\Facades\View::composer('*', function ($view) {
             $globalPlants = \App\Models\Plant::active()->get()->map(function($plant) {
                 $img = $plant->image_url;
