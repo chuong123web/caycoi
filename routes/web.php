@@ -4,6 +4,21 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+Route::get('/debug-error', function () {
+    try {
+        // Try rendering the home page
+        $html = view('home')->render();
+        return response()->json(['status' => 'ok', 'html_length' => strlen($html)]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect($e->getTrace())->take(5)->map(fn($t) => ($t['file'] ?? '?') . ':' . ($t['line'] ?? '?'))->toArray(),
+        ], 500);
+    }
+});
+
 Route::get('/', function () {
     return view('home');
 })->name('home');
