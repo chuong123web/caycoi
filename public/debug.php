@@ -14,6 +14,9 @@ try {
     
     $results['boot'] = 'OK';
     $results['php_version'] = phpversion();
+    $results['gd_loaded'] = extension_loaded('gd');
+    $results['imagick_loaded'] = extension_loaded('imagick');
+    $results['fileinfo_loaded'] = extension_loaded('fileinfo');
     
     // Check plants
     try {
