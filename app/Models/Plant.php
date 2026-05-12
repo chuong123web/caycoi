@@ -110,7 +110,7 @@ class Plant extends Model implements HasMedia
             // Check if physical file still exists (Railway ephemeral storage)
             try {
                 if (file_exists($media->getPath())) {
-                    return $media->getUrl();
+                    return url($media->getUrl());
                 }
             } catch (\Throwable $e) {
                 // Fall through to fallback
