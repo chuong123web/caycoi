@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -49,6 +50,15 @@ class Plant extends Model implements HasMedia
                 $plant->slug = Str::slug($plant->name);
             }
         });
+
+        // Clear frontend cache whenever plant data changes
+        static::saved(function () {
+            Cache::forget('global_plants');
+        });
+
+        static::deleted(function () {
+            Cache::forget('global_plants');
+        });
     }
 
     /**
@@ -93,21 +103,21 @@ class Plant extends Model implements HasMedia
      */
     public function getImageUrlAttribute(): string
     {
-        // Try to get Spatie media URL, but verify the file actually exists on disk
-        // (Railway's ephemeral filesystem can delete uploaded files on redeploy)
+        // Priority 1: Return Spatie media URL if media exists in database
         $media = $this->getFirstMedia('thumbnail') ?: $this->getFirstMedia('images');
         
         if ($media) {
+            // Check if physical file still exists (Railway ephemeral storage)
             try {
-                $path = $media->getPath();
-                if (file_exists($path)) {
+                if (file_exists($media->getPath())) {
                     return $media->getUrl();
                 }
             } catch (\Throwable $e) {
-                // File doesn't exist, fall through to fallback
+                // Fall through to fallback
             }
         }
         
+        // Priority 2: Fallback to pre-defined external images
         $fallbackImages = [
             'monstera-deliciosa' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAEal89Ri29QIEUyt8Q5hnSJIN8m1dYff6pRCkj676kk0GoS7sgZj7f7-_8d06cwQ8ulynVHu1h6pzv48LKVbNb-_kQ-V6408tW4lOyYlzZMrJzYWRCiaInFpZpD6glvEVr3ZFQ_cKMiH3IAvk3loYlwL9iHQnIcxzuK1h6Acwbdd1qZRYY48OMF6Pz-mgXAmlk9gZHAXqMke9X8uD-mKHer6xWXwP3hHJ39bPOXWLZMAH1M-Knp5eUAF3panSDr2sLrVT7tMVJY61V',
             'zz-plant' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnzfmbsjoknHW7FwQmr9s8-YLNuNKa2a43l68Q7g_k4RLKX2qfGnmyhA_GI-rQCixBw_DAodkfZJvH_XCkIezu46nd3STrsT2LiqPEwCN1hBldWg61IOdzNcMT9dmvlgkuPY434qmkmqETTOO0q3uzmo0EEItk9Jc7RqzoPwTRLNF7rC1YsiF9vVTwUDsc-jyfKL2DLZL_piPudMtF_U-fLVT3Vqf5qC8miG7H7TMmkGBpFxmwmj2Ltgoh7dPY4czN5MA0FaAons6x',

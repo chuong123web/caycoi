@@ -26,6 +26,15 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Clear plant cache when Spatie media is added/deleted
+        $mediaModel = config('media-library.media_model', \Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+        $mediaModel::saved(function () {
+            Cache::forget('global_plants');
+        });
+        $mediaModel::deleted(function () {
+            Cache::forget('global_plants');
+        });
+
         // Load globalPlants for frontend views, skip admin/filament views
         \Illuminate\Support\Facades\View::composer('*', function ($view) {
             $viewName = $view->getName();
