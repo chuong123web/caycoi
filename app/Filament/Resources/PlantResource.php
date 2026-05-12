@@ -37,7 +37,7 @@ class PlantResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Forms\Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn ($set, ?string $state) => $set('slug', Str::slug($state))),
 
                         Forms\Components\TextInput::make('name_vi')
                             ->label('Tên tiếng Việt')
