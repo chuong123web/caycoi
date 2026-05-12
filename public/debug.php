@@ -19,6 +19,14 @@ try {
     try {
         $results['plants_count'] = \App\Models\Plant::count();
         $results['active_plants'] = \App\Models\Plant::where('is_active', true)->count();
+        
+        // Test disks
+        \Illuminate\Support\Facades\Storage::disk('local')->put('test.txt', 'test');
+        $results['local_disk_writable'] = \Illuminate\Support\Facades\Storage::disk('local')->exists('test.txt');
+        
+        \Illuminate\Support\Facades\Storage::disk('public')->put('test.txt', 'test');
+        $results['public_disk_writable'] = \Illuminate\Support\Facades\Storage::disk('public')->exists('test.txt');
+        
     } catch (\Throwable $e) {
         $results['plants'] = 'FAIL: ' . $e->getMessage();
     }
