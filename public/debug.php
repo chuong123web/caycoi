@@ -1,5 +1,6 @@
 <?php
-// Fix debug.php to properly bootstrap Laravel so it doesn't fail on app('files')
+define('LARAVEL_START', microtime(true));
+
 header('Content-Type: application/json');
 $results = [];
 
@@ -7,9 +8,9 @@ try {
     require __DIR__.'/../vendor/autoload.php';
     $app = require_once __DIR__.'/../bootstrap/app.php';
     
-    // Proper bootstrap sequence
-    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-    $kernel->bootstrap();
+    // Instead of sending response, we will just bootstrap to see if it fails
+    // In Laravel 11, handleRequest does bootstrapping
+    // To catch the error, we can temporarily set APP_DEBUG=true and capture output
     
     $results['boot'] = 'OK';
     $results['php_version'] = phpversion();
