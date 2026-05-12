@@ -1,107 +1,91 @@
 <?php
-// Test upload endpoint to diagnose Livewire upload issues
-header('Content-Type: application/json');
-$results = [];
+// Direct test of the Livewire upload endpoint
+header('Content-Type: text/plain');
 
+// Create a small test image
+$img = imagecreatetruecolor(100, 100);
+$green = imagecolorallocate($img, 0, 128, 0);
+imagefill($img, 0, 0, $green);
+$tmpFile = tempnam(sys_get_temp_dir(), 'img');
+imagejpeg($img, $tmpFile, 90);
+imagedestroy($img);
+
+echo "=== Test Image Created ===\n";
+echo "Path: $tmpFile\n";
+echo "Size: " . filesize($tmpFile) . " bytes\n\n";
+
+// Test 1: Try to directly call the upload controller
+echo "=== Testing Livewire Upload Handler ===\n";
 try {
     require __DIR__.'/../vendor/autoload.php';
     $app = require_once __DIR__.'/../bootstrap/app.php';
-    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-    $kernel->bootstrap();
+    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-    // Test 1: Create livewire-tmp dir on local disk
-    try {
-        $disk = \Illuminate\Support\Facades\Storage::disk('local');
-        $disk->put('livewire-tmp/test_upload.txt', 'hello world');
-        $results['local_disk_write'] = $disk->exists('livewire-tmp/test_upload.txt');
-        $results['local_disk_path'] = $disk->path('livewire-tmp/test_upload.txt');
-        $results['local_disk_path_exists'] = file_exists($disk->path('livewire-tmp/test_upload.txt'));
-        $disk->delete('livewire-tmp/test_upload.txt');
-    } catch (\Throwable $e) {
-        $results['local_disk_write'] = 'FAIL: ' . $e->getMessage();
-    }
+    // Create a fake upload request
+    $uploadedFile = new \Illuminate\Http\UploadedFile(
+        $tmpFile,
+        'test_image.jpg',
+        'image/jpeg',
+        null,
+        true // test mode
+    );
 
-    // Test 2: Write a fake image to public disk (simulating Spatie)
-    try {
-        $disk = \Illuminate\Support\Facades\Storage::disk('public');
-        // Create a 1x1 pixel PNG
-        $img = imagecreatetruecolor(1, 1);
-        ob_start();
-        imagepng($img);
-        $imgData = ob_get_clean();
-        imagedestroy($img);
+    // Try to store through Livewire's mechanism
+    $disk = \Illuminate\Support\Facades\Storage::disk('local');
+    $path = $disk->putFile('livewire-tmp', $uploadedFile);
+    echo "Upload to local disk: SUCCESS\n";
+    echo "Stored at: $path\n";
+    echo "Full path: " . $disk->path($path) . "\n";
+    echo "Exists: " . ($disk->exists($path) ? 'yes' : 'no') . "\n";
+    $disk->delete($path);
+    echo "Deleted: yes\n\n";
 
-        $disk->put('test_image.png', $imgData);
-        $results['public_disk_image_write'] = $disk->exists('test_image.png');
-        $results['public_disk_image_url'] = $disk->url('test_image.png');
-        $results['public_disk_image_path'] = $disk->path('test_image.png');
-        $results['public_disk_image_accessible'] = file_exists(public_path('storage/test_image.png'));
-        $disk->delete('test_image.png');
-        $results['gd_working'] = true;
-    } catch (\Throwable $e) {
-        $results['public_disk_image_write'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // Test 3: Simulate Spatie Media Library addMedia
-    try {
-        $plant = \App\Models\Plant::first();
-        if ($plant) {
-            $results['plant'] = $plant->name;
-            $results['media_count'] = $plant->media()->count();
-            $results['spatie_disk'] = config('media-library.disk_name', 'public');
-            
-            // Check if media-library config exists
-            $results['media_config_exists'] = file_exists(config_path('media-library.php'));
-        }
-    } catch (\Throwable $e) {
-        $results['spatie_test'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // Test 4: Check if the upload-file endpoint would work by checking middleware
-    try {
-        $routes = app('router')->getRoutes();
-        foreach ($routes as $route) {
-            if (str_contains($route->uri(), 'upload-file')) {
-                $results['upload_route'] = [
-                    'uri' => $route->uri(),
-                    'methods' => $route->methods(),
-                    'middleware' => $route->middleware(),
-                    'action' => $route->getActionName(),
-                ];
+    // Test public disk too
+    $disk2 = \Illuminate\Support\Facades\Storage::disk('public');
+    $path2 = $disk2->putFile('test-uploads', $uploadedFile);
+    echo "Upload to public disk: SUCCESS\n";
+    echo "Stored at: $path2\n";
+    echo "URL: " . $disk2->url($path2) . "\n";
+    echo "Accessible from web: " . (file_exists(public_path('storage/' . $path2)) ? 'yes' : 'no') . "\n";
+    $disk2->delete($path2);
+    
+    // Test Spatie Media Library directly
+    echo "\n=== Testing Spatie Media Library ===\n";
+    $plant = \App\Models\Plant::first();
+    if ($plant) {
+        // Create a test image file
+        $testImgPath = storage_path('app/test_spatie.jpg');
+        copy($tmpFile, $testImgPath);
+        
+        try {
+            $plant->addMedia($testImgPath)
+                ->toMediaCollection('thumbnail');
+            echo "Spatie addMedia: SUCCESS\n";
+            echo "Media count: " . $plant->media()->count() . "\n";
+            $media = $plant->getFirstMedia('thumbnail');
+            if ($media) {
+                echo "Media URL: " . $media->getUrl() . "\n";
+                echo "Media path: " . $media->getPath() . "\n";
+                echo "Media file exists: " . (file_exists($media->getPath()) ? 'yes' : 'no') . "\n";
+            }
+        } catch (\Throwable $e) {
+            echo "Spatie addMedia: FAIL - " . $e->getMessage() . "\n";
+            echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+            // Show first 5 trace lines
+            $trace = $e->getTrace();
+            for ($i = 0; $i < min(5, count($trace)); $i++) {
+                echo "  " . ($trace[$i]['file'] ?? '?') . ":" . ($trace[$i]['line'] ?? '?') . "\n";
             }
         }
-    } catch (\Throwable $e) {
-        $results['route_check'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // Test 5: Check if session works (needed for CSRF)
-    try {
-        $results['session_driver'] = config('session.driver');
-        $results['session_table'] = config('session.table');
-        // Try to verify sessions table exists
-        $sessionTableExists = \Illuminate\Support\Facades\Schema::hasTable(config('session.table', 'sessions'));
-        $results['session_table_exists'] = $sessionTableExists;
-    } catch (\Throwable $e) {
-        $results['session_check'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // Test 6: Check CSRF config
-    $results['csrf_cookie'] = config('session.cookie');
-
-    // Test 7: Force-enable logging so we can see errors
-    try {
-        \Illuminate\Support\Facades\Log::info('Test log from upload_test.php');
-        $logPath = storage_path('logs/laravel.log');
-        $results['log_path'] = $logPath;
-        $results['log_exists'] = file_exists($logPath);
-        $results['log_writable'] = is_writable(dirname($logPath));
-    } catch (\Throwable $e) {
-        $results['logging'] = 'FAIL: ' . $e->getMessage();
     }
 
 } catch (\Throwable $e) {
-    $results['fatal'] = $e->getMessage();
-    $results['trace'] = $e->getFile() . ':' . $e->getLine();
+    echo "FATAL: " . $e->getMessage() . "\n";
+    echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n";
+    $trace = $e->getTrace();
+    for ($i = 0; $i < min(5, count($trace)); $i++) {
+        echo "  " . ($trace[$i]['file'] ?? '?') . ":" . ($trace[$i]['line'] ?? '?') . "\n";
+    }
 }
 
-echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+@unlink($tmpFile);
