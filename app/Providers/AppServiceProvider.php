@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
                         'description' => $plant->description,
                         'care_instructions' => $plant->care_instructions,
                     ];
-                });
+                })->toArray();
             });
             $view->with('globalPlants', $globalPlants);
         });
