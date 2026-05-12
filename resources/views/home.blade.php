@@ -90,6 +90,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @php
             $bestsellers = collect($globalPlants)->filter(function($p) {
+                if (empty($p['tag'])) return false;
                 return str_contains($p['tag'], 'Bán chạy') || str_contains($p['tag'], 'Lọc') || str_contains($p['tag'], 'Cây lớn');
             })->take(4)->values();
             @endphp
