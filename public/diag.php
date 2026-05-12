@@ -1,105 +1,65 @@
 <?php
 header('Content-Type: application/json');
+require __DIR__.'/../vendor/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel->bootstrap();
+
 $results = [];
 
-try {
-    require __DIR__.'/../vendor/autoload.php';
-    $app = require_once __DIR__.'/../bootstrap/app.php';
-    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-    $kernel->bootstrap();
-
-    // 1. APP_URL
-    $results['app_url'] = config('app.url');
-    $results['app_env'] = config('app.env');
-    $results['app_debug'] = config('app.debug');
-
-    // 2. Session driver
-    $results['session_driver'] = config('session.driver');
-    $results['session_path'] = config('session.files');
-
-    // 3. Filesystem
-    $results['filesystem_default'] = config('filesystems.default');
-    
-    // 4. Livewire temp upload disk
-    $results['livewire_upload_disk'] = config('livewire.temporary_file_upload.disk') ?: 'default (local)';
-    $results['livewire_upload_rules'] = config('livewire.temporary_file_upload.rules');
-    $results['livewire_upload_dir'] = config('livewire.temporary_file_upload.directory') ?: 'livewire-tmp';
-
-    // 5. Test storage write
-    $storagePath = storage_path('app/livewire-tmp');
-    if (!is_dir($storagePath)) {
-        @mkdir($storagePath, 0755, true);
-    }
-    $results['livewire_tmp_exists'] = is_dir($storagePath);
-    $results['livewire_tmp_writable'] = is_writable($storagePath);
-
-    // 6. Test storage facade
-    try {
-        \Illuminate\Support\Facades\Storage::disk('local')->put('livewire-tmp/test.txt', 'test');
-        $results['storage_write'] = \Illuminate\Support\Facades\Storage::disk('local')->exists('livewire-tmp/test.txt');
-        \Illuminate\Support\Facades\Storage::disk('local')->delete('livewire-tmp/test.txt');
-    } catch (\Throwable $e) {
-        $results['storage_write'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // 7. Test public disk
-    try {
-        \Illuminate\Support\Facades\Storage::disk('public')->put('test_upload.txt', 'test');
-        $results['public_disk_write'] = \Illuminate\Support\Facades\Storage::disk('public')->exists('test_upload.txt');
-        \Illuminate\Support\Facades\Storage::disk('public')->delete('test_upload.txt');
-    } catch (\Throwable $e) {
-        $results['public_disk_write'] = 'FAIL: ' . $e->getMessage();
-    }
-
-    // 8. Check symlink
-    $symlinkPath = public_path('storage');
-    $results['storage_symlink_exists'] = file_exists($symlinkPath);
-    $results['storage_symlink_is_link'] = is_link($symlinkPath);
-    if (is_link($symlinkPath)) {
-        $results['storage_symlink_target'] = readlink($symlinkPath);
-    }
-
-    // 9. Check media-library disk config
-    $results['media_disk'] = config('media-library.disk_name', 'public (default)');
-
-    // 10. Recent log errors
-    $logFile = storage_path('logs/laravel.log');
-    if (file_exists($logFile)) {
-        $logContent = file_get_contents($logFile);
-        $lines = explode("\n", $logContent);
-        $lastLines = array_slice($lines, -30);
-        // Filter for errors
-        $errors = array_filter($lastLines, function($line) {
-            return str_contains($line, 'ERROR') || str_contains($line, 'error') || str_contains($line, 'Exception') || str_contains($line, 'upload');
-        });
-        $results['recent_errors'] = array_values($errors);
-    } else {
-        $results['log_file'] = 'not found';
-    }
-
-    // 11. Check CSRF/Session
-    $results['session_save_path'] = session_save_path();
-    $results['tmp_dir'] = sys_get_temp_dir();
-    $results['tmp_writable'] = is_writable(sys_get_temp_dir());
-
-    // 12. Check Livewire routes
-    try {
-        $routes = app('router')->getRoutes();
-        $lwRoutes = [];
-        foreach ($routes as $route) {
-            $uri = $route->uri();
-            if (str_contains($uri, 'livewire')) {
-                $lwRoutes[] = $route->methods()[0] . ' ' . $uri;
-            }
-        }
-        $results['livewire_routes'] = $lwRoutes;
-    } catch (\Throwable $e) {
-        $results['livewire_routes'] = 'FAIL: ' . $e->getMessage();
-    }
-
-} catch (\Throwable $e) {
-    $results['fatal'] = $e->getMessage();
-    $results['file'] = $e->getFile() . ':' . $e->getLine();
+// 1. Check symlink
+$symlinkPath = public_path('storage');
+$results['symlink_exists'] = file_exists($symlinkPath);
+$results['symlink_is_link'] = is_link($symlinkPath);
+if (is_link($symlinkPath)) {
+    $results['symlink_target'] = readlink($symlinkPath);
+    $results['symlink_target_exists'] = is_dir(readlink($symlinkPath));
 }
+
+// 2. Check storage directory
+$storagePath = storage_path('app/public');
+$results['storage_public_exists'] = is_dir($storagePath);
+$results['storage_public_writable'] = is_writable($storagePath);
+
+// 3. List files in storage/app/public
+$results['storage_files'] = [];
+if (is_dir($storagePath)) {
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($storagePath));
+    $count = 0;
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $count < 30) {
+            $results['storage_files'][] = str_replace($storagePath, '', $file->getPathname());
+            $count++;
+        }
+    }
+}
+
+// 4. Check Railway volume env vars
+$results['volume_name'] = env('RAILWAY_VOLUME_NAME', 'NOT SET');
+$results['volume_mount'] = env('RAILWAY_VOLUME_MOUNT_PATH', 'NOT SET');
+
+// 5. Check all plants with media
+$plants = \App\Models\Plant::all();
+$results['plants'] = [];
+foreach ($plants as $plant) {
+    $media = $plant->getFirstMedia('thumbnail') ?: $plant->getFirstMedia('images');
+    $info = [
+        'name' => $plant->name,
+        'slug' => $plant->slug,
+        'has_media' => !!$media,
+        'image_url' => $plant->image_url,
+    ];
+    if ($media) {
+        $info['media_id'] = $media->id;
+        $info['media_file'] = $media->file_name;
+        $info['media_path'] = $media->getPath();
+        $info['media_exists'] = file_exists($media->getPath());
+        $info['media_url'] = $media->getUrl();
+    }
+    $results['plants'][] = $info;
+}
+
+// 6. Count total media records
+$results['total_media_records'] = \Spatie\MediaLibrary\MediaCollections\Models\Media::count();
 
 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
