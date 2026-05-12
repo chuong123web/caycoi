@@ -19,7 +19,8 @@ echo "=== Testing Livewire Upload Handler ===\n";
 try {
     require __DIR__.'/../vendor/autoload.php';
     $app = require_once __DIR__.'/../bootstrap/app.php';
-    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+    $kernel->bootstrap();
 
     // Create a fake upload request
     $uploadedFile = new \Illuminate\Http\UploadedFile(
