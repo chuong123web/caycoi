@@ -10,6 +10,7 @@
         "ext-intl": "*",
         "ext-zip": "*",
         "ext-exif": "*",
+        "ext-gd": "*",
         "bezhansalleh/filament-shield": "*",
         "filament/filament": "*",
         "filament/spatie-laravel-media-library-plugin": "*",
