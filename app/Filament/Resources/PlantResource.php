@@ -129,9 +129,13 @@ class PlantResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('image_url')
+                Tables\Columns\ImageColumn::make('product_image')
                     ->label('Ảnh')
-                    ->circular(),
+                    ->getStateUsing(fn ($record) => $record->image_url)
+                    ->width(60)
+                    ->height(60)
+                    ->square()
+                    ->extraImgAttributes(['style' => 'object-fit: cover; border-radius: 8px;']),
 
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên')
