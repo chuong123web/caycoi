@@ -1,0 +1,35 @@
+============================================
+   RAILWAY MYSQL - SERVICE VARIABLES
+============================================
+
+MYSQL_DATABASE=railway
+MYSQL_PUBLIC_URL=mysql://root:YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd@tramway.proxy.rlwy.net:10558/railway
+MYSQL_ROOT_PASSWORD=YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd
+MYSQL_URL=mysql://root:YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd@mysql.railway.internal:3306/railway
+MYSQLDATABASE=railway
+MYSQLHOST=mysql.railway.internal
+MYSQLPASSWORD=YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd
+MYSQLPORT=3306
+MYSQLUSER=root
+
+============================================
+   LARAVEL .ENV FORMAT (for production)
+============================================
+
+DB_CONNECTION=mysql
+DB_HOST=tramway.proxy.rlwy.net
+DB_PORT=10558
+DB_DATABASE=railway
+DB_USERNAME=root
+DB_PASSWORD=YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd
+
+============================================
+   LARAVEL .ENV FORMAT (internal - for Railway app)
+============================================
+
+DB_CONNECTION=mysql
+DB_HOST=mysql.railway.internal
+DB_PORT=3306
+DB_DATABASE=railway
+DB_USERNAME=root
+DB_PASSWORD=YacizdkgTjzkuDuzFdXjjxJpNGqwCXvd

@@ -102,7 +102,7 @@ class AnalyticsController extends Controller
             return response()->json(['error' => 'Python script not found'], 404);
         }
 
-        $command = "python \"{$scriptPath}\" \"{$dbPath}\" 2>&1";
+        $command = "python3 \"{$scriptPath}\" \"{$dbPath}\" 2>&1";
         $output = shell_exec($command);
 
         $result = json_decode($output, true);
