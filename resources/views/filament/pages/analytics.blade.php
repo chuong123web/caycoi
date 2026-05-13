@@ -151,10 +151,114 @@
 
     {{-- Python Analysis --}}
     <div style="background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:24px;">
-        <h3 style="font-size:16px;font-weight:700;color:#1b5e20;margin:0 0 8px 0;">🐍 Phân Tích Nâng Cao (Python)</h3>
-        <p style="font-size:13px;color:#6b7280;margin:0 0 16px 0;">Chạy script Python để phân tích dữ liệu chuyên sâu và đưa ra gợi ý popup.</p>
-        <a href="{{ route('api.analytics.python') }}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;background:#1b5e20;color:#fff;font-weight:600;font-size:13px;text-decoration:none;transition:all 0.2s;">
-            ▶ Chạy Phân Tích Python
-        </a>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div>
+                <h3 style="font-size:16px;font-weight:700;color:#1b5e20;margin:0 0 8px 0;">🐍 Phân Tích Nâng Cao (Python)</h3>
+                <p style="font-size:13px;color:#6b7280;margin:0;">Chạy script Python để phân tích dữ liệu và vẽ biểu đồ tự động.</p>
+            </div>
+            <button id="run-python-btn" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;background:#1b5e20;color:#fff;font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all 0.2s;">
+                ▶ Chạy Phân Tích Python
+            </button>
+        </div>
+
+        <div id="python-loading" style="display:none; text-align:center; padding: 20px; color: #6b7280; font-size: 13px;">
+            ⏳ Đang phân tích dữ liệu bằng Python và vẽ biểu đồ...
+        </div>
+
+        <div id="python-results" style="display:none; margin-top:20px;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
+                    <canvas id="pythonGenderChart"></canvas>
+                </div>
+                <div style="border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
+                    <canvas id="pythonAgeChart"></canvas>
+                </div>
+            </div>
+            <div style="margin-top:20px; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
+                <h4 style="font-size:14px; font-weight:700; color:#1b5e20; margin:0 0 12px 0;">💡 Gợi Ý Marketing Từ Python</h4>
+                <ul id="python-recommendations" style="font-size:13px; color:#4b5563; padding-left:20px; margin:0; line-height:1.6;"></ul>
+            </div>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('run-python-btn').addEventListener('click', function() {
+            const btn = this;
+            const loading = document.getElementById('python-loading');
+            const results = document.getElementById('python-results');
+            
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            loading.style.display = 'block';
+            results.style.display = 'none';
+
+            fetch('{{ route('api.analytics.python') }}')
+                .then(res => res.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    results.style.display = 'block';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+
+                    if (data.error) {
+                        alert('Lỗi Python: ' + data.error);
+                        return;
+                    }
+
+                    // Biểu đồ giới tính (Doughnut)
+                    const genderCtx = document.getElementById('pythonGenderChart');
+                    if (window.genderChartInstance) window.genderChartInstance.destroy();
+                    const genderLabels = Object.keys(data.gender_distribution || {}).map(k => k === 'male' ? 'Nam' : (k === 'female' ? 'Nữ' : k));
+                    const genderValues = Object.values(data.gender_distribution || {});
+                    
+                    window.genderChartInstance = new Chart(genderCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: genderLabels,
+                            datasets: [{
+                                data: genderValues,
+                                backgroundColor: ['#1565c0', '#e91e63', '#ff9800']
+                            }]
+                        },
+                        options: { plugins: { title: { display: true, text: 'Phân Bố Giới Tính' } } }
+                    });
+
+                    // Biểu đồ độ tuổi (Bar)
+                    const ageCtx = document.getElementById('pythonAgeChart');
+                    if (window.ageChartInstance) window.ageChartInstance.destroy();
+                    const ageLabels = Object.keys(data.age_distribution || {});
+                    const ageValues = Object.values(data.age_distribution || {});
+                    
+                    window.ageChartInstance = new Chart(ageCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ageLabels,
+                            datasets: [{
+                                label: 'Khách hàng',
+                                data: ageValues,
+                                backgroundColor: '#4caf50'
+                            }]
+                        },
+                        options: { plugins: { title: { display: true, text: 'Phân Bố Độ Tuổi' } } }
+                    });
+
+                    // Gợi ý Popup
+                    const recList = document.getElementById('python-recommendations');
+                    recList.innerHTML = '';
+                    (data.popup_recommendations || []).forEach(rec => {
+                        const li = document.createElement('li');
+                        li.style.marginBottom = '8px';
+                        li.innerHTML = `<strong>Gợi ý Popup:</strong> Bán <em>${rec.plant_name}</em> cho ${rec.target_gender ? (rec.target_gender==='male'?'Nam giới':'Nữ giới') : ('nhóm tuổi ' + rec.target_age)}. <br/><span style="color:#9ca3af;font-size:12px;">(Lý do: ${rec.reason})</span>`;
+                        recList.appendChild(li);
+                    });
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    alert('Lỗi kết nối hoặc không thể xử lý dữ liệu.');
+                });
+        });
+    </script>
 </x-filament-panels::page>
